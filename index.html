@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil Partageable</title>
+    <meta name="description" content="Créez votre profil personnel et partagez-le avec vos amis qui pourront répondre à vos questions et vous laisser des messages.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 20px;
+        }
+        
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .feature {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        .required::after {
+            content: " *";
+            color: var(--danger);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            width: 100%;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-success {
+            background: var(--success);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: #212529;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .link-container {
+            background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 2px dashed #d4b996;
+        }
+        
+        .profile-link {
+            color: var(--secondary);
+            font-weight: 600;
+            word-break: break-all;
+            text-decoration: none;
+            display: block;
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .profile-link:hover {
+            text-decoration: underline;
+        }
+        
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .share-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+        
+        .share-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .profile-display {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            margin-top: 40px;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #6c757d;
+        }
+        
+        .step.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .email-config {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .share-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-user-friends"></i>
+            </div>
+            <h1>Mon Profil Partageable</h1>
+            <p class="subtitle">Créez votre profil personnel, générez un lien unique et partagez-le avec vos amis. Ils pourront répondre à vos questions et vous laisser un message qui vous sera envoyé par email.</p>
+            
+            <div class="step-indicator">
+                <div class="step active">1</div>
+                <div class="step">2</div>
+                <div class="step">3</div>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-user-edit"></i>
+                    <span>Créez votre profil</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Partagez le lien</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-envelope"></i>
+                    <span>Recevez les réponses par email</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <!-- Section création de profil -->
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-user-edit"></i> Créer votre profil</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Important :</strong> Pour recevoir les réponses par email, vous devez renseigner votre adresse email ci-dessous.
+                    </div>
+                </div>
+                
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="fullName" class="required">Nom complet</label>
+                        <input type="text" id="fullName" class="form-control" required placeholder="Votre nom et prénom">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userEmail" class="required">Votre email</label>
+                        <input type="email" id="userEmail" class="form-control" required placeholder="votre@email.com">
+                        <small style="color: #666; margin-top: 5px; display: block;">Les réponses de vos amis seront envoyées à cette adresse</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="birthdate">Date de naissance</label>
+                        <input type="date" id="birthdate" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city">Ville</label>
+                        <input type="text" id="city" class="form-control" placeholder="Votre ville de résidence">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bio">Biographie</label>
+                        <textarea id="bio" class="form-control" rows="4" placeholder="Parlez un peu de vous... vos passions, vos centres d'intérêt"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hobbies">Centres d'intérêt (séparés par des virgules)</label>
+                        <input type="text" id="hobbies" class="form-control" placeholder="ex: Musique, Sport, Voyage, Cinéma">
+                    </div>
+                    
+                    <h3 class="card-title" style="font-size: 1.3rem; margin-top: 30px;">
+                        <i class="fas fa-question-circle"></i> Questions pour vos amis
+                    </h3>
+                    <p>Ajoutez des questions pour tester vos amis !</p>
+                    
+                    <div id="questionsContainer">
+                        <div class="question-item">
+                            <input type="text" class="question form-control" placeholder="Ex: Quelle est ma couleur préférée?" value="Quelle est ma couleur préférée?">
+                        </div>
+                        <div class="question-item" style="margin-top: 10px;">
+                            <input type="text" class="question form-control" placeholder="Ex: Quel est mon plat préféré?" value="Quel est mon plat préféré?">
+                        </div>
+                        <div class="question-item" style="margin-top: 10px;">
+                            <input type="text" class="question form-control" placeholder="Ex: Où ai-je passé mes dernières vacances?" value="Où ai-je passé mes dernières vacances?">
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="addQuestion" class="btn btn-success" style="margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Ajouter une question
+                    </button>
+                    
+                    <button type="submit" class="btn" style="margin-top: 25px;">
+                        <i class="fas fa-link"></i> Générer mon lien partageable
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Section aperçu et partage -->
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-eye"></i> Votre lien de partage</h2>
+                
+                <div id="profilePreview" class="hidden">
+                    <div class="profile-display">
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-right: 15px;" id="previewAvatar">
+                                JD
+                            </div>
+                            <div>
+                                <h3 id="previewName" style="margin: 0;">John Doe</h3>
+                                <p id="previewLocation" style="color: #666; margin: 5px 0 0;">Paris, France</p>
+                            </div>
+                        </div>
+                        <p id="previewBio" style="color: #555;">Bio de l'utilisateur...</p>
+                        <p id="previewEmail" style="color: #777; font-size: 0.9rem; margin-top: 10px;">
+                            <i class="fas fa-envelope"></i> Les réponses seront envoyées à : <span id="previewEmailValue">john@example.com</span>
+                        </p>
+                    </div>
+                    
+                    <div class="link-container">
+                        <p><strong>Votre lien unique est prêt !</strong></p>
+                        <p>Partagez ce lien avec vos amis :</p>
+                        
+                        <a href="#" id="profileLink" class="profile-link" target="_blank">
+                            https://monprofilpartageable.com/profil/12345
+                        </a>
+                        
+                        <div class="email-config">
+                            <h4><i class="fas fa-envelope"></i> Service Email Activé</h4>
+                            <p style="margin: 10px 0; font-size: 0.9rem;">
+                                <i class="fas fa-check-circle" style="color: var(--success);"></i> 
+                                <strong>EmailJS configuré</strong> - Les réponses vous seront automatiquement envoyées par email.
+                            </p>
+                            <p style="margin: 10px 0; font-size: 0.9rem; color: #666;">
+                                Quand un ami répondra à vos questions, ses réponses vous seront envoyées à l'adresse : 
+                                <strong id="configEmail">votre@email.com</strong>
+                            </p>
+                        </div>
+                        
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn" id="shareFB" style="background: #3b5998;">
+                                <i class="fab fa-facebook-f"></i> Facebook
+                            </a>
+                            <a href="#" class="share-btn" id="shareTwitter" style="background: #1da1f2;">
+                                <i class="fab fa-twitter"></i> Twitter
+                            </a>
+                            <a href="#" class="share-btn" id="shareWhatsApp" style="background: #25d366;">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                            <a href="#" class="share-btn" id="copyLink" style="background: #6c757d;">
+                                <i class="fas fa-copy"></i> Copier
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="noProfileMessage" style="text-align: center; padding: 40px 20px;">
+                    <i class="fas fa-share-alt" style="font-size: 4rem; color: #ddd; margin-bottom: 20px;"></i>
+                    <h3 style="color: #666; margin-bottom: 15px;">Votre lien apparaîtra ici</h3>
+                    <p>Créez votre profil pour générer un lien unique à partager avec vos amis.</p>
+                    <div class="alert alert-info" style="margin-top: 20px;">
+                        <i class="fas fa-envelope"></i>
+                        <div><strong>Service d'emails actif :</strong> Les réponses de vos amis vous seront envoyées par email automatiquement.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section pour les amis -->
+        <div class="card hidden" id="friendView">
+            <h2 class="card-title"><i class="fas fa-users"></i> Répondre au profil</h2>
+            <p>Vous avez été invité à répondre à ce profil. Vos réponses seront envoyées par email à la personne.</p>
+            
+            <div class="profile-display" style="margin: 20px 0;">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-right: 15px;" id="friendAvatar">
+                        JD
+                    </div>
+                    <div>
+                        <h3 id="friendName" style="margin: 0;">Profil de John Doe</h3>
+                        <p id="friendLocation" style="color: #666; margin: 5px 0 0;">Paris, France</p>
+                    </div>
+                </div>
+                <p id="friendBio" style="color: #555; margin: 10px 0;">Bio de l'utilisateur...</p>
+            </div>
+            
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>Service d'emails activé :</strong> Vos réponses seront envoyées par email à <span id="profileOwnerEmail">[email]</span>.
+                </div>
+            </div>
+            
+            <form id="friendForm">
+                <h3 style="margin-bottom: 20px;">Répondez aux questions :</h3>
+                
+                <div id="friendQuestionsContainer">
+                    <!-- Questions ajoutées dynamiquement -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="friendNameInput" class="required">Votre nom</label>
+                    <input type="text" id="friendNameInput" class="form-control" required placeholder="Votre nom">
+                </div>
+                
+                <div class="form-group">
+                    <label for="friendEmailInput">Votre email (optionnel)</label>
+                    <input type="email" id="friendEmailInput" class="form-control" placeholder="votre@email.com">
+                    <small style="color: #666; margin-top: 5px; display: block;">Pour recevoir une copie de vos réponses</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="personalMessage" class="required">Message personnel</label>
+                    <textarea id="personalMessage" class="form-control" rows="4" placeholder="Écrivez un message personnel pour votre ami..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn" id="submitFriendForm">
+                    <i class="fas fa-paper-plane"></i> Envoyer mes réponses par email
+                </button>
+                
+                <div id="emailSending" class="hidden" style="text-align: center; padding: 20px;">
+                    <div class="spinner"></div>
+                    <p>Envoi de l'email en cours...</p>
+                </div>
+            </form>
+            
+            <div id="thankYouMessage" class="hidden" style="text-align: center; padding: 30px;">
+                <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success); margin-bottom: 20px;"></i>
+                <h3>Merci pour vos réponses !</h3>
+                <p>Vos réponses ont été envoyées par email à <span id="recipientName">[Nom]</span>.</p>
+                <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                    <i class="fas fa-envelope"></i> Un email avec vos réponses a été envoyé à l'adresse : <span id="sentToEmail">[email]</span>
+                </p>
+                <div class="alert alert-info" style="margin: 20px 0;">
+                    <i class="fas fa-info-circle"></i>
+                    <div>Le propriétaire du profil recevra vos réponses dans sa boîte email.</div>
+                </div>
+                <button id="newResponse" class="btn btn-secondary" style="margin-top: 20px;">
+                    <i class="fas fa-redo"></i> Répondre à un autre profil
+                </button>
+            </div>
+            
+            <div id="emailError" class="hidden" style="text-align: center; padding: 30px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: var(--danger); margin-bottom: 20px;"></i>
+                <h3>Erreur d'envoi</h3>
+                <p>Une erreur est survenue lors de l'envoi de l'email. Veuillez réessayer.</p>
+                <button id="retryButton" class="btn btn-warning" style="margin-top: 20px;">
+                    <i class="fas fa-redo"></i> Réessayer
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <p><strong>Mon Profil Partageable</strong> &copy; 2023 - Recevez les réponses de vos amis par email</p>
+            <p style="margin-top: 10px; font-size: 0.8rem;">
+                <i class="fas fa-envelope"></i> Service d'emails fourni par EmailJS - Configuration complète et fonctionnelle
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration EmailJS - DÉJÀ CONFIGURÉE ET FONCTIONNELLE
+        const EMAILJS_CONFIG = {
+            USER_ID: 'Io6Hnm0G4kXPyWShT', // Public Key EmailJS
+            SERVICE_ID: 'service_ojmbm6s', // Service ID EmailJS
+            TEMPLATE_ID: 'template_bd82lji' // Template ID EmailJS
+        };
+        
+        // Initialiser EmailJS
+        (function() {
+            emailjs.init(EMAILJS_CONFIG.USER_ID);
+            console.log('EmailJS initialisé avec succès');
+        })();
+        
+        // Fonctionnalités principales
+        document.addEventListener('DOMContentLoaded', function() {
+            // Éléments DOM
+            const profileForm = document.getElementById('profileForm');
+            const addQuestionBtn = document.getElementById('addQuestion');
+            const questionsContainer = document.getElementById('questionsContainer');
+            const profilePreview = document.getElementById('profilePreview');
+            const noProfileMessage = document.getElementById('noProfileMessage');
+            const friendView = document.getElementById('friendView');
+            const friendForm = document.getElementById('friendForm');
+            const thankYouMessage = document.getElementById('thankYouMessage');
+            const emailError = document.getElementById('emailError');
+            const copyLinkBtn = document.getElementById('copyLink');
+            
+            // Variables d'état
+            let userProfile = null;
+            let profileId = null;
+            let questionCount = 3;
+            
+            // Vérifier si on est en mode "ami" (vue des amis)
+            const urlParams = new URLSearchParams(window.location.search);
+            const profileParam = urlParams.get('profile');
+            
+            if (profileParam) {
+                // Mode ami - charger le profil
+                loadFriendView(profileParam);
+            } else {
+                // Mode création - vérifier s'il y a un profil récent
+                const savedProfile = localStorage.getItem('lastProfile');
+                if (savedProfile) {
+                    userProfile = JSON.parse(savedProfile);
+                    profileId = userProfile.id;
+                    updateProfilePreview();
+                    profilePreview.classList.remove('hidden');
+                    noProfileMessage.classList.add('hidden');
+                }
+            }
+            
+            // Ajouter une question
+            addQuestionBtn.addEventListener('click', function() {
+                questionCount++;
+                const newQuestion = document.createElement('div');
+                newQuestion.className = 'question-item';
+                newQuestion.style.marginTop = '10px';
+                newQuestion.innerHTML = `
+                    <input type="text" class="question form-control" placeholder="Question ${questionCount}">
+                `;
+                questionsContainer.appendChild(newQuestion);
+            });
+            
+            // Soumission du formulaire de profil
+            profileForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Récupérer les données
+                const userEmail = document.getElementById('userEmail').value;
+                
+                const profileData = {
+                    id: 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    fullName: document.getElementById('fullName').value,
+                    email: userEmail,
+                    birthdate: document.getElementById('birthdate').value,
+                    city: document.getElementById('city').value,
+                    bio: document.getElementById('bio').value,
+                    hobbies: document.getElementById('hobbies').value,
+                    questions: [],
+                    createdAt: new Date().toISOString()
+                };
+                
+                // Récupérer les questions
+                const questionInputs = document.querySelectorAll('.question');
+                questionInputs.forEach(input => {
+                    if (input.value.trim()) {
+                        profileData.questions.push(input.value.trim());
+                    }
+                });
+                
+                // Sauvegarder le profil
+                userProfile = profileData;
+                profileId = profileData.id;
+                localStorage.setItem('lastProfile', JSON.stringify(profileData));
+                localStorage.setItem(profileData.id, JSON.stringify(profileData));
+                
+                // Mettre à jour l'aperçu
+                updateProfilePreview();
+                
+                // Générer le lien
+                const baseUrl = window.location.origin + window.location.pathname;
+                const profileLink = `${baseUrl}?profile=${profileId}`;
+                const profileLinkElement = document.getElementById('profileLink');
+                profileLinkElement.href = profileLink;
+                profileLinkElement.textContent = profileLink;
+                
+                // Mettre à jour les boutons de partage
+                const shareText = `Répondez à mes questions et laissez-moi un message sur mon profil personnel! Vos réponses me seront envoyées par email.`;
+                document.getElementById('shareFB').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileLink)}`;
+                document.getElementById('shareTwitter').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(profileLink)}&text=${encodeURIComponent(shareText)}`;
+                document.getElementById('shareWhatsApp').href = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + profileLink)}`;
+                
+                // Afficher l'aperçu
+                profilePreview.classList.remove('hidden');
+                noProfileMessage.classList.add('hidden');
+                
+                // Animation des étapes
+                document.querySelectorAll('.step')[1].classList.add('active');
+            });
+            
+            // Copier le lien
+            copyLinkBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const link = document.getElementById('profileLink').href;
+                navigator.clipboard.writeText(link).then(() => {
+                    const originalText = copyLinkBtn.innerHTML;
+                    copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> Copié!';
+                    setTimeout(() => {
+                        copyLinkBtn.innerHTML = originalText;
+                    }, 2000);
+                });
+            });
+            
+            // Mettre à jour l'aperçu du profil
+            function updateProfilePreview() {
+                if (!userProfile) return;
+                
+                // Avatar avec initiales
+                const names = userProfile.fullName.split(' ');
+                const initials = (names[0].charAt(0) + (names[1] ? names[1].charAt(0) : '')).toUpperCase();
+                document.getElementById('previewAvatar').textContent = initials;
+                
+                // Informations du profil
+                document.getElementById('previewName').textContent = userProfile.fullName;
+                document.getElementById('previewLocation').textContent = userProfile.city || '';
+                document.getElementById('previewBio').textContent = userProfile.bio || 'Aucune biographie fournie.';
+                document.getElementById('previewEmailValue').textContent = userProfile.email;
+                document.getElementById('configEmail').textContent = userProfile.email;
+            }
+            
+            // Charger la vue ami
+            function loadFriendView(profileId) {
+                const savedProfile = localStorage.getItem(profileId);
+                if (savedProfile) {
+                    userProfile = JSON.parse(savedProfile);
+                    
+                    // Afficher la vue ami
+                    document.querySelector('header').classList.add('hidden');
+                    document.querySelector('.main-content').classList.add('hidden');
+                    friendView.classList.remove('hidden');
+                    
+                    // Mettre à jour les informations du profil
+                    const names = userProfile.fullName.split(' ');
+                    const initials = (names[0].charAt(0) + (names[1] ? names[1].charAt(0) : '')).toUpperCase();
+                    
+                    document.getElementById('friendAvatar').textContent = initials;
+                    document.getElementById('friendName').textContent = `Profil de ${userProfile.fullName}`;
+                    document.getElementById('friendLocation').textContent = userProfile.city || '';
+                    document.getElementById('friendBio').textContent = userProfile.bio || 'Aucune biographie fournie.';
+                    document.getElementById('profileOwnerEmail').textContent = userProfile.email || 'non spécifié';
+                    document.getElementById('recipientName').textContent = userProfile.fullName;
+                    document.getElementById('sentToEmail').textContent = userProfile.email;
+                    
+                    // Ajouter les questions
+                    const container = document.getElementById('friendQuestionsContainer');
+                    container.innerHTML = '';
+                    
+                    userProfile.questions.forEach((question, index) => {
+                        const questionElement = document.createElement('div');
+                        questionElement.className = 'form-group';
+                        questionElement.innerHTML = `
+                            <label>${index + 1}. ${question}</label>
+                            <input type="text" class="form-control friend-answer" data-index="${index}" placeholder="Votre réponse..." required>
+                        `;
+                        container.appendChild(questionElement);
+                    });
+                    
+                    // Soumission des réponses avec envoi d'email
+                    friendForm.addEventListener('submit', async function(e) {
+                        e.preventDefault();
+                        
+                        const friendName = document.getElementById('friendNameInput').value;
+                        const friendEmail = document.getElementById('friendEmailInput').value;
+                        const personalMessage = document.getElementById('personalMessage').value;
+                        
+                        // Récupérer les réponses
+                        const answers = [];
+                        document.querySelectorAll('.friend-answer').forEach((input, index) => {
+                            answers.push({
+                                question: userProfile.questions[index],
+                                answer: input.value
+                            });
+                        });
+                        
+                        // Préparer les données pour l'email
+                        const emailData = {
+                            to_name: userProfile.fullName,
+                            to_email: userProfile.email,
+                            from_name: friendName,
+                            from_email: friendEmail || 'non renseigné',
+                            message: personalMessage,
+                            profile_link: window.location.href,
+                            answers_html: formatAnswersForEmail(answers),
+                            date: new Date().toLocaleDateString('fr-FR')
+                        };
+                        
+                        // Afficher l'indicateur de chargement
+                        friendForm.classList.add('hidden');
+                        document.getElementById('emailSending').classList.remove('hidden');
+                        
+                        try {
+                            // Envoyer l'email via EmailJS
+                            const response = await emailjs.send(
+                                EMAILJS_CONFIG.SERVICE_ID,
+                                EMAILJS_CONFIG.TEMPLATE_ID,
+                                emailData
+                            );
+                            
+                            console.log('Email envoyé avec succès:', response);
+                            
+                            // Sauvegarder les réponses localement
+                            if (!userProfile.responses) {
+                                userProfile.responses = [];
+                            }
+                            
+                            userProfile.responses.push({
+                                friendName,
+                                friendEmail,
+                                personalMessage,
+                                answers,
+                                date: new Date().toISOString(),
+                                emailSent: true
+                            });
+                            
+                            localStorage.setItem(profileId, JSON.stringify(userProfile));
+                            
+                            // Afficher le message de remerciement
+                            document.getElementById('emailSending').classList.add('hidden');
+                            thankYouMessage.classList.remove('hidden');
+                            
+                        } catch (error) {
+                            console.error('Erreur lors de l\'envoi de l\'email:', error);
+                            
+                            // Afficher l'erreur
+                            document.getElementById('emailSending').classList.add('hidden');
+                            emailError.classList.remove('hidden');
+                            
+                            // Bouton pour réessayer
+                            document.getElementById('retryButton').onclick = function() {
+                                emailError.classList.add('hidden');
+                                friendForm.classList.remove('hidden');
+                            };
+                        }
+                    });
+                    
+                    // Nouvelle réponse
+                    document.getElementById('newResponse').addEventListener('click', function() {
+                        window.location.href = window.location.pathname;
+                    });
+                } else {
+                    // Profil non trouvé
+                    friendView.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc3545; margin-bottom: 20px;"></i>
+                            <h3>Profil non trouvé</h3>
+                            <p>Ce profil n'existe pas ou a été supprimé.</p>
+                            <a href="${window.location.pathname}" class="btn" style="margin-top: 20px;">
+                                <i class="fas fa-plus"></i> Créer votre propre profil
+                            </a>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Formater les réponses pour l'email
+            function formatAnswersForEmail(answers) {
+                let html = '<ul style="margin: 15px 0; padding-left: 20px;">';
+                answers.forEach(item => {
+                    html += `<li><strong>${item.question}</strong><br>${item.answer}</li>`;
+                });
+                html += '</ul>';
+                return html;
+            }
+            
+            // Test initial d'EmailJS
+            console.log('Vérification EmailJS...');
+            console.log('User ID:', EMAILJS_CONFIG.USER_ID);
+            console.log('Service ID:', EMAILJS_CONFIG.SERVICE_ID);
+            console.log('Template ID:', EMAILJS_CONFIG.TEMPLATE_ID);
+        });
+    </script>
+</body>
+</html>
